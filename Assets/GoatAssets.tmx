@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="4" height="1" tilewidth="19" tileheight="19" infinite="0" nextlayerid="5" nextobjectid="1">
+ <tileset firstgid="1" source="Goat19.tsx"/>
+ <layer id="1" name="GoatFront" width="4" height="1" visible="0">
+  <data encoding="csv">
+1,2,3,4
+</data>
+ </layer>
+ <layer id="3" name="GoatLeft" width="4" height="1" visible="0">
+  <data encoding="csv">
+9,10,11,12
+</data>
+ </layer>
+ <layer id="4" name="GoatRight" width="4" height="1" visible="0">
+  <data encoding="csv">
+13,14,15,16
+</data>
+ </layer>
+ <layer id="2" name="GoatBack" width="4" height="1" visible="0">
+  <data encoding="csv">
+5,6,7,8
+</data>
+ </layer>
+</map>
