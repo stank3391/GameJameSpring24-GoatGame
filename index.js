@@ -60,46 +60,41 @@ function animate() {
         0,
         playerImage.width / 4,
         playerImage.height / 5,
-        500,
-        500,
+        canvas.width/2,
+        canvas.height/2,
         (playerImage.width / 4) * 2.2,
         (playerImage.height / 5) * 2.2
     )
-    if (keys.w == true && lastKey == 'w') {
+    if (keys.w == true) {
         background.position.y += 3
     }
-    if (keys.a == true && lastKey == 'a') {
+    if (keys.a == true) {
         background.position.x += 3
     }
-    if (keys.s == true && lastKey == 's') {
+    if (keys.s == true) {
         background.position.y -= 3
     }
-    if (keys.d == true && lastKey == 'd') {
+    if (keys.d == true) {
         background.position.x -= 3
     }
 }
 
 animate()
 
-let lastKey = ''
 
 window.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w':
             keys.w = true
-            lastKey = 'w'
             break;
         case 'a':
             keys.a = true
-            lastKey = 'a'
             break;
         case 's':
             keys.s = true
-            lastKey = 's'
             break;
         case 'd':
             keys.d = true
-            lastKey = 'd'
             break;
     }
 })
