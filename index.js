@@ -20,21 +20,54 @@ backgroundImage.onload = () => {
 
 
 class Sprite {
-    constructor({ position, velocity, image }) {
+    constructor({ position, velocity, image, frames = { max: 4 }, direction}) {
         this.position = position
         this.image = image
-    }
+        this.frames = { ...frames, val: 0, elapsed: 0 }
+        this.direction = direction
+
+        this.image.onload = () => {
+            this.width = this.image.width / this.frames.max
+            this.height = this.image.height
+        }
+        this.moving = false;
+
+}
 
     draw() {
-        c.drawImage(this.image, this.position.x, this.position.y)
+        c.drawImage(
+            this.image,
+            (this.image.width / 4) * this.frames.val, 
+            (this.image.height / 5) * this.direction,
+            this.image.width / 4,
+            this.image.height / 5,
+            this.position.x,
+            this.position.y,
+            (this.image.width / 4) * 2.2,
+            (this.image.height / 5) * 2.2
+        )
+        if (this.moving) {
+            if (this.frames.max > 1) {
+                this.frames.elapsed++
+            }
+            if (this.frames.elapsed % 10 == 0) {
+                if (this.frames.val < this.frames.max) this.frames.val++
+                else this.frames.val = 0
+            }
+        }
     }
 }
-const background = new Sprite({
+const player = new Sprite({
     position: {
-        x: 0,
-        y: 0
+        x: 500,
+        y: 500
     },
-    image: backgroundImage
+    image: playerImage,
+    frames: {
+        max: 3
+    }, 
+    direction: 0
+
 })
 
 const keys = {
@@ -53,29 +86,31 @@ const keys = {
 }
 function animate() {
     window.requestAnimationFrame(animate);
-    background.draw()
-    c.drawImage(
-        playerImage,
-        0,
-        0,
-        playerImage.width / 4,
-        playerImage.height / 5,
-        canvas.width/2,
-        canvas.height/2,
-        (playerImage.width / 4) * 2.2,
-        (playerImage.height / 5) * 2.2
-    )
+    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+    player.draw()
+    let moving = false
+    player.moving = false;
+
+
     if (keys.w == true) {
-        background.position.y += 3
-    }
-    if (keys.a == true) {
-        background.position.x += 3
+        player.direction = 1
+        player.moving = true
+        player.position.y -= 3
     }
     if (keys.s == true) {
-        background.position.y -= 3
+        player.direction = 0
+        player.moving = true
+        player.position.y += 3
+    }
+    if (keys.a == true) {
+        player.direction = 2
+        player.moving = true
+        player.position.x -= 3
     }
     if (keys.d == true) {
-        background.position.x -= 3
+        player.direction = 3
+        player.moving = true
+        player.position.x += 3
     }
 }
 
