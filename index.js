@@ -1,6 +1,6 @@
 const canvas = document.querySelector('canvas')
-canvas.width = 1024
-canvas.height = 576
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
 
 const c = canvas.getContext('2d')
 
@@ -14,26 +14,43 @@ const playerImage = new Image()
 playerImage.src = "./Assets/goat animation.png"
 
 backgroundImage.onload = () => {
-    const scale = canvas.width / backgroundImage.width;
-    console.log (scale)
-    c.drawImage(backgroundImage, 0, 0, backgroundImage.width * scale, backgroundImage.height * scale)
+    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
 }
 
 
 class Sprite {
     constructor({ position, velocity, image }) {
-        this.position = positon
+        this.position = position
         this.image = image
     }
 
     draw() {
-        c.drawImage(image, 0, 0, backgroundImage.width * scale, backgroundImage.height * scale)
-
+        c.drawImage(this.image, this.position.x, this.position.y)
     }
 }
-const background = new Sprite({ postion: {x: 0, y: 0}, image: image })
+const background = new Sprite({
+    position: {
+        x: 0,
+        y: 0
+    },
+    image: backgroundImage
+})
 
+const keys = {
+    w: {
+        pressed: false
+    },
+    a: {
+        pressed: false
+    },
+    s: {
+        pressed: false
+    },
+    d: {
+        pressed: false
+    }
+}
 function animate() {
     window.requestAnimationFrame(animate);
     background.draw()
@@ -46,24 +63,60 @@ function animate() {
         500,
         500,
         (playerImage.width / 4) * 2.2,
-        (playerImage.height / 5) * 2.2)
+        (playerImage.height / 5) * 2.2
+    )
+    if (keys.w == true && lastKey == 'w') {
+        background.position.y += 3
+    }
+    if (keys.a == true && lastKey == 'a') {
+        background.position.x += 3
+    }
+    if (keys.s == true && lastKey == 's') {
+        background.position.y -= 3
+    }
+    if (keys.d == true && lastKey == 'd') {
+        background.position.x -= 3
+    }
 }
 
 animate()
 
+let lastKey = ''
+
 window.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w':
-            console.log('pressed w')
+            keys.w = true
+            lastKey = 'w'
             break;
         case 'a':
-            console.log('pressed a')
+            keys.a = true
+            lastKey = 'a'
             break;
         case 's':
-            console.log('pressed s')
+            keys.s = true
+            lastKey = 's'
             break;
         case 'd':
-            console.log('pressed d')
+            keys.d = true
+            lastKey = 'd'
+            break;
+    }
+})
+
+window.addEventListener('keyup', (e) => {
+    switch (e.key) {
+        case 'w':
+            keys.w = false
+            break;
+        case 'a':
+            keys.a = false
+            break;
+        case 's':
+            keys.s = false
+            break;
+        case 'd':
+            keys.d = false
             break;
     }
 })
