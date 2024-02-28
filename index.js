@@ -8,7 +8,6 @@ for (let i = 0; i < collisions.length; i += 36) {
     collisionsMap.push(collisions.slice(i,i + 36))
 }
 
-
 const tileSize = 32
 class Boundary {
     static width = tileSize
@@ -26,6 +25,8 @@ class Boundary {
 }
 
 const boundaries = []
+
+const bullets = []
 
 collisionsMap.forEach((row, i) => {
     row.forEach((symbol, j) => {
@@ -55,10 +56,10 @@ backgroundImage.onload = () => {
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
 }
 
-
 class Sprite {
-    constructor({ position, velocity, image, frames = { max: 4 }, direction}) {
+    constructor({ position, velocity = 0, image, frames = { max: 4 }, direction}) {
         this.position = position
+        this.velocity = velocity
         this.image = image
         this.frames = { ...frames, val: 0, elapsed: 0 }
         this.direction = direction
@@ -68,8 +69,7 @@ class Sprite {
             this.height = this.image.height
         }
         this.moving = false;
-
-}
+    }
 
     draw() {
         c.drawImage(
@@ -126,10 +126,71 @@ const keys = {
     }
 }
 
+function getPlayerDirection(origin) {
+    let xDistance = origin.position.x - player.position.x
+    let yDistance = origin.position.y - player.position.y
+    let direction = 0
 
+    if (Math.abs(xDistance) > Math.abs(yDistance)) {
+        if (xDistance > 0) {
+            direction = 2
+        } else {
+            direction = 3
+        }
+    } else {
+        if (yDistance > 0) {
+            direction = 1
+        } else {
+            direction = 0
+        }
+    }
 
+    return direction
+}
 
-function rectangularCollision({rect1, rect2 }) {
+function spawnBullet({origin, velocity}) {
+    let direction = getPlayerDirection(origin)
+
+    let bullet = new Sprite({
+        position: {
+            x: origin.position.x,
+            y: origin.position.y
+        },
+        velocity: velocity,
+        // PLACEHOLDER ASSET
+        image: playerImage,
+        frames: {
+            max: 3
+        }, 
+        direction: direction
+    })
+    bullet.moving = true
+
+    bullets.push(bullet)
+}
+
+function updateBullet(bullet) {
+    switch(bullet.direction) {
+        case 0:
+            bullet.position.y += bullet.velocity
+            break;
+        case 1:
+            bullet.position.y -= bullet.velocity
+            break;
+        case 2:
+            bullet.position.x -= bullet.velocity
+            break;
+        case 3:
+            bullet.position.x += bullet.velocity
+            break;
+    }
+
+    if (bullet.position.x < 0 || bullet.position.x > (35 * 32) || bullet.position.y < 0 || bullet.position.y > (17 * 32)) {
+        bullets.splice(bullets.indexOf(bullet), 1)
+    }
+}
+
+function rectangularCollision({rect1, rect2}) {
     return (
         (rect1.position.x + rect1.width >= rect2.position.x)
         && (rect1.position.x <= rect2.position.x + rect2.width)
@@ -137,6 +198,13 @@ function rectangularCollision({rect1, rect2 }) {
         && (rect1.position.y + rect1.height / 2 >= rect2.position.y)
     )
 }
+
+function bulletCollision(bullet) {
+    if (rectangularCollision({rect1: player, rect2: bullet})) {
+        console.log("bullet collision")
+    }
+}
+
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
@@ -146,7 +214,11 @@ function animate() {
         boundary.draw()
     })
 
-
+    for (let i = 0; i < bullets.length; i++) {
+        bullets[i].draw()
+        bulletCollision(bullets[i])
+        updateBullet(bullets[i])
+    }
 
 
     player.draw()
@@ -260,6 +332,11 @@ function animate() {
         }
     }
 }
+
+spawnBullet({origin: {position: {x: 200, y: 200}}, velocity: 1})
+spawnBullet({origin: {position: {x: 300, y: 300}}, velocity: 2})
+spawnBullet({origin: {position: {x: 500, y: 200}}, velocity: 0.5})
+spawnBullet({origin: {position: {x: 100, y: 250}}, velocity: 4})
 
 animate()
 
