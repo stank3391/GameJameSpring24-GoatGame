@@ -51,6 +51,9 @@ backgroundImage.src = "./Assets/BackgroundNew.png"
 const playerImage = new Image()
 playerImage.src = "./Assets/goat animation.png"
 
+const bulletImage = new Image()
+bulletImage.src = "./Assets/goat animation.png"
+
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
@@ -165,8 +168,7 @@ function spawnBullet({origin, velocity}) {
             y: origin.position.y
         },
         velocity: velocity,
-        // PLACEHOLDER ASSET
-        image: playerImage,
+        image: bulletImage,
         frames: {
             max: 3
         }, 
@@ -188,10 +190,6 @@ function updateBullet(bullet) {
 }
 
 function rectangularCollision({rect1, rect2}) {
-    if ((rect1.position.x + rect1.width >= rect2.position.x)) {
-        console.log(rect1, rect2)
-    }
-
     return (
         (rect1.position.x + rect1.width >= rect2.position.x)
         && (rect1.position.x <= rect2.position.x + rect2.width)
@@ -217,13 +215,11 @@ function animate() {
 
     for (let i = 0; i < bullets.length; i++) {
         bullets[i].draw()
-        //bulletCollision(bullets[i])
+        bulletCollision(bullets[i])
         updateBullet(bullets[i])
     }
 
-
     player.draw()
-
 
     let moving = true
     player.moving = false;
