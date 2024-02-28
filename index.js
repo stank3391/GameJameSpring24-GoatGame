@@ -71,6 +71,11 @@ class Sprite {
         this.moving = false;
     }
 
+    setXYDirection({x, y}) {
+        this.xDirection = x
+        this.yDirection = y
+    }
+
     draw() {
         c.drawImage(
             this.image,
@@ -129,8 +134,10 @@ const keys = {
 function getPlayerDirection(origin) {
     let xDistance = origin.position.x - player.position.x
     let yDistance = origin.position.y - player.position.y
-    let direction = 0
 
+    let direction = {x: xDistance / Math.abs(yDistance) * -1, y: yDistance / Math.abs(xDistance) * -1}
+
+    /*
     if (Math.abs(xDistance) > Math.abs(yDistance)) {
         if (xDistance > 0) {
             direction = 2
@@ -144,6 +151,7 @@ function getPlayerDirection(origin) {
             direction = 0
         }
     }
+    */
 
     return direction
 }
@@ -162,28 +170,17 @@ function spawnBullet({origin, velocity}) {
         frames: {
             max: 3
         }, 
-        direction: direction
+        direction: 0
     })
+    bullet.setXYDirection({x: direction.x, y: direction.y})
     bullet.moving = true
 
     bullets.push(bullet)
 }
 
 function updateBullet(bullet) {
-    switch(bullet.direction) {
-        case 0:
-            bullet.position.y += bullet.velocity
-            break;
-        case 1:
-            bullet.position.y -= bullet.velocity
-            break;
-        case 2:
-            bullet.position.x -= bullet.velocity
-            break;
-        case 3:
-            bullet.position.x += bullet.velocity
-            break;
-    }
+    bullet.position.x += bullet.xDirection * bullet.velocity
+    bullet.position.y += bullet.yDirection * bullet.velocity
 
     if (bullet.position.x < 0 || bullet.position.x > (35 * 32) || bullet.position.y < 0 || bullet.position.y > (17 * 32)) {
         bullets.splice(bullets.indexOf(bullet), 1)
@@ -191,6 +188,10 @@ function updateBullet(bullet) {
 }
 
 function rectangularCollision({rect1, rect2}) {
+    if ((rect1.position.x + rect1.width >= rect2.position.x)) {
+        console.log(rect1, rect2)
+    }
+
     return (
         (rect1.position.x + rect1.width >= rect2.position.x)
         && (rect1.position.x <= rect2.position.x + rect2.width)
@@ -216,7 +217,7 @@ function animate() {
 
     for (let i = 0; i < bullets.length; i++) {
         bullets[i].draw()
-        bulletCollision(bullets[i])
+        //bulletCollision(bullets[i])
         updateBullet(bullets[i])
     }
 
@@ -336,7 +337,8 @@ function animate() {
 spawnBullet({origin: {position: {x: 200, y: 200}}, velocity: 1})
 spawnBullet({origin: {position: {x: 300, y: 300}}, velocity: 2})
 spawnBullet({origin: {position: {x: 500, y: 200}}, velocity: 0.5})
-spawnBullet({origin: {position: {x: 100, y: 250}}, velocity: 4})
+spawnBullet({origin: {position: {x: 100, y: 300}}, velocity: 4})
+
 
 animate()
 
