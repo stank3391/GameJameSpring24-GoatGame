@@ -1,3 +1,13 @@
+
+/////////////////////////////////////////////////////////////////////////
+
+// This file is depricated and not up to date.
+// I Couldn't figure out how to call it from Index.js
+// I kept getting a bunch of errors
+
+/////////////////////////////////////////////////////////////////////////
+
+
 const milkImage = new Image();
 milkImage.src = './Assests/Milkman/MilkManAnimation.png'
 

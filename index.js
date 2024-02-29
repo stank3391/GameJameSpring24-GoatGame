@@ -8,7 +8,6 @@ for (let i = 0; i < collisions.length; i += 36) {
     collisionsMap.push(collisions.slice(i,i + 36))
 }
 
-
 const tileSize = 32
 class Boundary {
     static width = tileSize
@@ -55,7 +54,6 @@ backgroundImage.onload = () => {
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
 }
 
-
 class Sprite {
     constructor({ position, velocity, image, frames = { max: 4 }, direction}) {
         this.position = position;
@@ -93,6 +91,25 @@ class Sprite {
                 else this.frames.val = 0
             }
         }
+    }
+
+    // Add a method to update the sprite's position
+    updatePosition() {
+        // Check if the enemy reaches or exceeds the left or right edge of the backgroundImage
+        if (this.position.x <= 0 || this.position.x >= backgroundImage.width) {
+            // Reverse the x velocity to make the enemy bounce back
+            this.velocity.x = -this.velocity.x;
+        }
+
+        // Update y position
+        this.position.y += this.velocity.y;
+        // Check if the enemy reaches or exceeds the top or bottom edge of the backgroundImage
+        if (this.position.y <= 0 || this.position.y >= backgroundImage.height) {
+            // Reverse the y velocity to make the enemy bounce back
+            this.velocity.y = -this.velocity.y;
+        }
+        // Update x position
+        this.position.x += this.velocity.x;
     }
 }
 
@@ -146,8 +163,12 @@ class EnemySpawner {
         // Create the enemy sprite immediately
         const enemy = new Sprite({
             position: {
-                x: Math.random() * backgroundImage.width,
-                y: Math.random() * backgroundImage.height
+                x: Math.random() * (backgroundImage.width - playerImage.width),
+                y: Math.random() * (backgroundImage.height - playerImage.height)
+            },
+            velocity:{
+                x: Math.random() * 2 - 1,
+                y: Math.random() * 2 - 1
             },
             image: milkImage,
             frames: {
@@ -189,6 +210,7 @@ function animate() {
 
     // Draw enemies
     enemies.forEach(enemy => {
+        enemy.updatePosition();
         enemy.draw();
     })
 
