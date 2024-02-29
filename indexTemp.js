@@ -1,125 +1,15 @@
+//====================Set Up=========================
 const canvas = document.querySelector('canvas')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 const c = canvas.getContext('2d')
 
+const speed = 3
 const collisionsMap = []
-for (let i = 0; i < collisions.length; i += 36) {
-    collisionsMap.push(collisions.slice(i,i + 36))
-}
-
 const boundaries = []
-const bullets = []
-const milkMans = []
-
-collisionsMap.forEach((row, i) => {
-    row.forEach((symbol, j) => {
-        if (symbol === 9373) {
-            boundaries.push(
-                new Boundary({
-                    position: {
-                        x: j * Boundary.width,
-                        y: i * Boundary.height
-                    }
-                })
-            )
-        }
-    })
-})
-
-console.log(boundaries)
-
 const backgroundImage = new Image()
-backgroundImage.src = "./Assets/BackgroundNew.png"
-
-const playerImage = new Image()
-playerImage.src = "./Assets/goat animation.png"
-
-// TEMPORARY ASSET
-const bulletImage = new Image()
-bulletImage.src = "./Assets/goat animation.png"
-
-backgroundImage.onload = () => {
-    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 4) , (playerImage.height /5))
-}
-
-class Sprite {
-    static frameAnimationCount = 10
-    constructor({ position, velocity = 0, image, frames = { max: 4 }, direction}) {
-        this.position = position
-        this.velocity = velocity
-        this.image = image
-        this.frames = { ...frames, val: 0, elapsed: 0 }
-        this.direction = direction
-
-        this.image.onload = () => {
-            this.width = this.image.width / this.frames.max
-            this.height = this.image.height
-        }
-        this.moving = false;
-    }
-
-    // Setter for x and y direction (for diagonal directions)
-    setXYDirection({x, y}) {
-        this.xDirection = x
-        this.yDirection = y
-    }
-
-    draw() {
-        c.drawImage(
-            this.image,
-            this.image.width / 4 * this.frames.val, 
-            this.image.height / 5 * this.direction,
-            this.image.width / 4,
-            this.image.height / 5,
-            this.position.x,
-            this.position.y,
-            this.image.width / 4,
-            this.image.height / 5,
-        )
-        if (this.moving) {
-            if (this.frames.max > 1) this.frames.elapsed++
-            if (this.frames.elapsed % Sprite.frameAnimationCount  == 0) {
-                if (this.frames.val < this.frames.max) this.frames.val++
-                else this.frames.val = 0
-            }
-        }
-    }
-
-    // Add a method to update the sprite's position
-    updatePosition() {
-        // Check if the enemy reaches or exceeds the left or right edge of the backgroundImage
-        if (this.position.x <= 0 || this.position.x >= backgroundImage.width) {
-            // Reverse the x velocity to make the enemy bounce back
-            this.velocity.x = -this.velocity.x;
-        }
-
-        // Update y position
-        this.position.y += this.velocity.y;
-        // Check if the enemy reaches or exceeds the top or bottom edge of the backgroundImage
-        if (this.position.y <= 0 || this.position.y >= backgroundImage.height) {
-            // Reverse the y velocity to make the enemy bounce back
-            this.velocity.y = -this.velocity.y;
-        }
-        // Update x position
-        this.position.x += this.velocity.x;
-    }
-}
-
-
-const player = new Sprite({
-    position: {
-        x: 250,
-        y: 250
-    },
-    image: playerImage,
-    frames: {
-        max: 3
-    }, 
-    direction: 0
-})
-
+const enemies = []
+const bullets = []
 const keys = {
     w: {
         pressed: false
@@ -135,50 +25,120 @@ const keys = {
     }
 }
 
-const milkImage = new Image();
-milkImage.src = './Assets/Milkman/MilkManAnimation.png'
-class EnemySpawner {
-    constructor(interval) {
-        this.interval = interval;
-        this.spawnInterval = null;
-    }
+//===================Auxilliary Functions=================
+function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
 
-    startSpawning() {
-        this.spawnInterval = setInterval(() => {
-            this.spawnEnemy();
-        }, this.interval);
-    }
+//=============Collisions & Boundaries=============================
+//Set up Collisions Map
+for (let i = 0; i < collisions.length; i += 36) {
+    collisionsMap.push(collisions.slice(i, i + 36))
+}
 
-    stopSpawning() {
-        clearInterval(this.spawnInterval);
-    }
+collisionsMap.forEach((row, i) => {
+    row.forEach((symbol, j) => {
+        if (symbol === 9373) {
+            boundaries.push(
+                new Boundary({ position: { x: j * Boundary.width, y: i * Boundary.height } })
+            )
+        }
+    })
+})
 
-    spawnEnemy() {
-        // Create the enemy sprite immediately
-        const enemy = new Sprite({
-            position: {
-                x: Math.random() * (backgroundImage.width - playerImage.width),
-                y: Math.random() * (backgroundImage.height - playerImage.height)
-            },
-            velocity: {
-                x: Math.random() * 2 - 1,
-                y: Math.random() * 2 - 1
-            },
-            image: milkImage,
-            frames: {
-                max: 3
-            },
-            direction: 0
-        });
 
-        // Add the enemy sprite to the game
-        enemies.push(enemy);
-    }
+//====================Background========================
+backgroundImage.src = "./Assets/BackgroundNew.png"
+
+backgroundImage.onload = () => {
+    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500, (playerImage.width / 4), (playerImage.height / 5))
 }
 
 
 
+//================Player Stuff==============================
+const playerImage = new Image()
+playerImage.src = "./Assets/goat animation.png"
 
+class Sprite {
+    static frameAnimationCount = 10
+
+    constructor({ position, velocity = 0, image, frames = { max: 4 }, direction, widthOfSprite, heighOfSprite }) {
+        this.position = position
+        this.velocity = velocity
+        this.image = image
+        this.frames = { ...frames, val: 0, elapsed: 0 }
+        this.direction = direction
+        this.widthOfSprite = widthOfSprite
+        this.heighOfSprite = heighOfSprite
+        this.image.onload = () => {
+            this.width = this.image.width / this.frames.max
+            this.height = this.image.height
+        }
+        this.moving = false;
+    }
+
+    setXYDirection({ x, y }) {
+        this.xDirection = x
+        this.yDirection = y
+    }
+
+    draw() {
+        c.drawImage(
+            this.image,
+            this.image.width / this.heighOfSprite * this.frames.val,
+            this.image.height / this.heighOfSprite * this.direction,
+            this.image.width / this.widthOfSprite,
+            this.image.height / this.heighOfSprite, 
+            this.position.x,
+            this.position.y,
+            this.image.width / this.widthOfSprite,
+            this.image.height / this.heighOfSprite
+        )
+        if (this.moving) {
+            if (this.frames.max > 1) this.frames.elapsed++
+            if (this.frames.elapsed % Sprite.frameAnimationCount == 0) {
+                if (this.frames.val < this.frames.max) this.frames.val++
+                else this.frames.val = 0
+            }
+        }
+    }
+
+    updatePosition() {
+        if (this.position.x <= 0 || this.position.x >= backgroundImage.width) {
+            this.velocity.x = -this.velocity.x;
+        }
+
+        this.position.y += this.velocity.y;
+        if (this.position.y <= 0 || this.position.y >= backgroundImage.height) {
+            this.velocity.y = -this.velocity.y;
+        }
+        this.position.x += this.velocity.x;
+    }
+}
+
+const player = new Sprite({
+    position: {
+        x: 250,
+        y: 250
+    },
+    image: playerImage,
+    frames: {
+        max: 3
+    },
+    direction: 0,
+    widthOfSprite: 4,
+    heighOfSprite: 5
+})
+
+
+
+
+
+//=====================Bullet Stuff==========================
+const bulletImage = new Image()
+bulletImage.src = "./Assets/goat animation.png"
 
 // Get diagonal bullet direction toward player
 function getPlayerDirection(origin) {
@@ -187,59 +147,12 @@ function getPlayerDirection(origin) {
     let yDistance = origin.position.y - player.position.y
 
     // Get x and y... vector elements? is this a vector? is this how vectors work?? i just played around with these formulae until they looked and worked right
-    let direction = {x: xDistance / Math.abs(yDistance) * -1, y: yDistance / Math.abs(xDistance) * -1}
+    let direction = { x: xDistance / Math.abs(yDistance) * -1, y: yDistance / Math.abs(xDistance) * -1 }
     return direction
 }
 
-function spawnMilkMan({ origin, velocity }) {
-    // Get direction to player
-    let direction = getPlayerDirection(origin)
-
-    // Create milkMan
-    let milkMan = new Sprite({
-        position: {
-            x: origin.position.x,
-            y: origin.position.y
-        },
-        velocity: velocity,
-        image: bulletImage,
-        frames: {
-            max: 3
-        },
-        direction: 0
-    })
-    // Set bullet x and y direction, set bullet to moving
-    milkMan.setXYDirection({ x: direction.x, y: direction.y })
-    milkMan.moving = true
-
-    // Set bullet width and height
-    milkMan.width = 25
-    milkMan.height = 25
-
-    // Add bullet to array
-    milkMans.push(milkMan)
-}
-
-// Move bullet forward
-function updateMilkMan(milkMan) {
-    // Increment bullet position by direction * velocity
-    milkMan.position.x += milkMan.xDirection * milkMan.velocity
-    milkMan.position.y += milkMan.yDirection * milkMan.velocity
-
-    // If bullet reaches edge of screen, despawn (remove from array)
-    if (milkMan.position.x < 0 || milkMan.position.x > (35 * 32 - milkMan.width / 2) || milkMan.position.y < 0 || milkMan.position.y > (17 * 32 - milkMan.height / 2)) {
-        despawnMilkMan(milkMan)
-    }
-}
-
-// Despawn bullet (remove from array)
-function despawnMilkMan(milkMan) {
-    milkMans.splice(milkMans.indexOf(milkMan), 1)
-}
-
-
 // Create bullet with specified origin and velocity
-function spawnBullet({origin, velocity}) {
+function spawnBullet({ origin, velocity }) {
     // Get direction to player
     let direction = getPlayerDirection(origin)
 
@@ -253,11 +166,13 @@ function spawnBullet({origin, velocity}) {
         image: bulletImage,
         frames: {
             max: 3
-        }, 
-        direction: 0
+        },
+        direction: 0,
+        widthOfSprite: 4,
+        heighOfSprite: 5
     })
     // Set bullet x and y direction, set bullet to moving
-    bullet.setXYDirection({x: direction.x, y: direction.y})
+    bullet.setXYDirection({ x: direction.x, y: direction.y })
     bullet.moving = true
 
     // Set bullet width and height
@@ -285,30 +200,85 @@ function despawnBullet(bullet) {
     bullets.splice(bullets.indexOf(bullet), 1)
 }
 
-function rectangularCollision({rect1, rect2}) {
+function rectangularCollision({ rect1, rect2 }) {
     return (
-        (rect1.position.x + rect1.width >= rect2.position.x)
-        && (rect1.position.x <= rect2.position.x + rect2.width)
-        && (rect1.position.y <= rect2.position.y + rect2.height)
-        && (rect1.position.y + rect1.height / 2 >= rect2.position.y)
+        ((Math.trunc(rect1.position.x) + rect1.width >= rect2.position.x)
+        && (Math.trunc(rect1.position.x) <= rect2.position.x + rect2.width)
+        && (Math.trunc(rect1.position.y) <= rect2.position.y + rect2.height)
+        && (Math.trunc(rect1.position.y) + rect1.height / 2 >= rect2.position.y))
     )
 }
 
 
-
-
-
-
 // Test for bullet collision
-const speed = 3
 function bulletCollision(bullet) {
-    if (rectangularCollision({rect1: player, rect2: bullet})) {
+    if (rectangularCollision({ rect1: player, rect2: bullet })) {
         console.log("bullet collision")
         despawnBullet(bullet)
 
         //DIE
+        return 0
     }
 }
+
+function spawnBulletEveryCoupleSeconds() {
+    // Call spawnBullet with the provided arguments
+    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0, 576) } }, velocity: getRandomNumber(0.5, 1) });
+}
+
+//=========================MilkMan Stuff=======================
+const milkImage = new Image();
+milkImage.src = './Assets/Milkman/MilkManAnimation.png'
+
+function spawnEnemy() {
+        const enemy = new Sprite({
+            position: {
+                x: getRandomNumber(100, 1000),
+                y: getRandomNumber(50, 400)
+            },
+            velocity: {
+                x: Math.random() * 2 - 1,
+                y: Math.random() * 2 - 1
+            },
+            image: milkImage,
+            frames: {
+                max: 8
+            },
+            direction: 0,
+            widthOfSprite: 8,
+            heighOfSprite: 4
+        });
+
+        // Add the enemy sprite to the game
+        enemies.push(enemy);
+}
+
+function despawnEnemy(enemy) {
+    enemies.splice(enemies.indexOf(enemy), 1)
+}
+
+function spawnEnemyEveryCoupleSeconds() {
+    // Call spawnBullet with the provided arguments
+    spawnEnemy();
+}
+
+function enemyCollision(enemy) {
+    if (rectangularCollision({ rect1: player, rect2: enemy })) {
+        console.log("enemy collision")
+        console.log(player)
+        console.log(enemy)
+        despawnEnemy(enemy)
+
+        //DIE
+        //return 0;
+    }
+}
+
+
+
+
+
+//=====================Animate========================
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
@@ -316,8 +286,16 @@ function animate() {
     for (let i = 0; i < bullets.length; i++) {
         // Draw, check for collision, move forward
         bullets[i].draw()
-        bulletCollision(bullets[i])
-        updateBullet(bullets[i])
+        if (bulletCollision(bullets[i]) != 0) {
+            updateBullet(bullets[i])
+        }
+    }
+
+    // Loop through enemies
+    for (let j = 0; j < enemies.length; j++) {
+        // Draw, check for collision, move forward
+        enemies[j].draw()
+        enemyCollision(enemies[j])
     }
 
     player.draw()
@@ -340,7 +318,7 @@ function animate() {
                     }
                 })
             ) {
-                console.log("colliding w")
+                //console.log("colliding w")
                 moving = false
                 break
             }
@@ -366,7 +344,7 @@ function animate() {
                     }
                 })
             ) {
-                console.log("colliding s")
+                //console.log("colliding s")
                 moving = false
                 break
             }
@@ -392,7 +370,7 @@ function animate() {
                     }
                 })
             ) {
-                console.log("colliding a")
+                //console.log("colliding a")
                 moving = false
                 break
             }
@@ -418,7 +396,7 @@ function animate() {
                     }
                 })
             ) {
-                console.log("colliding d")
+                //console.log("colliding d")
                 moving = false
                 break
             }
@@ -431,24 +409,10 @@ function animate() {
     }
 }
 
-function getRandomNumber(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-
-function spawnBulletEveryCoupleSeconds() {
-    // Call spawnBullet with the provided arguments
-    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0,576) } }, velocity: getRandomNumber(0.5, 1) });
-}
-
-function spawnMilkManEveryCoupleSeconds() {
-    // Call spawnBullet with the provided arguments
-    spawnMilkMan({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0, 576) } }, velocity: getRandomNumber(0.5, 1) });
-}
-
 
 animate()
 
+//Pressing Down
 window.addEventListener('keydown', (e) => {
     switch (e.key) {
         case 'w':
@@ -466,6 +430,7 @@ window.addEventListener('keydown', (e) => {
     }
 })
 
+//Lifting up
 window.addEventListener('keyup', (e) => {
     switch (e.key) {
         case 'w':
