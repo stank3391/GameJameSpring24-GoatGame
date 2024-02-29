@@ -42,7 +42,7 @@ bulletImage.src = "./Assets/goat animation.png"
 
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
+    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 8) , (playerImage.height /10))
 }
 
 class Sprite {
@@ -210,6 +210,8 @@ function bulletCollision(bullet) {
     if (rectangularCollision({rect1: player, rect2: bullet})) {
         console.log("bullet collision")
         despawnBullet(bullet)
+
+        //DIE
     }
 }
 function animate() {
@@ -217,9 +219,9 @@ function animate() {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
 
 
-    boundaries.forEach(boundary => {
-        boundary.draw()
-    })
+    //boundaries.forEach(boundary => {
+        //boundary.draw()
+    //})
 
     // Loop through bullets
     for (let i = 0; i < bullets.length; i++) {
@@ -340,11 +342,17 @@ function animate() {
     }
 }
 
-// Testing bullets
-spawnBullet({origin: {position: {x: 200, y: 200}}, velocity: 1})
-spawnBullet({origin: {position: {x: 300, y: 300}}, velocity: 2})
-spawnBullet({origin: {position: {x: 500, y: 200}}, velocity: 0.5})
-spawnBullet({origin: {position: {x: 100, y: 300}}, velocity: 4})
+function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+
+function spawnBulletEveryCoupleSeconds() {
+    // Call spawnBullet with the provided arguments
+    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0,576) } }, velocity: getRandomNumber(0.25, 1.5) });
+}
+
+
 
 animate()
 
