@@ -52,6 +52,7 @@ backgroundImage.src = "./Assets/BackgroundNew.png"
 const playerImage = new Image()
 playerImage.src = "./Assets/goat animation.png"
 
+// TEMPORARY ASSET
 const bulletImage = new Image()
 bulletImage.src = "./Assets/goat animation.png"
 
@@ -186,6 +187,10 @@ function spawnBullet({origin, velocity}) {
     bullet.setXYDirection({x: direction.x, y: direction.y})
     bullet.moving = true
 
+    // Set bullet width and height
+    bullet.width = 25
+    bullet.height = 25
+
     // Add bullet to array
     bullets.push(bullet)
 }
@@ -197,9 +202,14 @@ function updateBullet(bullet) {
     bullet.position.y += bullet.yDirection * bullet.velocity
 
     // If bullet reaches edge of screen, despawn (remove from array)
-    if (bullet.position.x < 0 || bullet.position.x > (35 * 32) || bullet.position.y < 0 || bullet.position.y > (17 * 32)) {
-        bullets.splice(bullets.indexOf(bullet), 1)
+    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (17 * 32 - bullet.height / 2)) {
+        despawnBullet(bullet)
     }
+}
+
+// Despawn bullet (remove from array)
+function despawnBullet(bullet) {
+    bullets.splice(bullets.indexOf(bullet), 1)
 }
 
 function rectangularCollision({rect1, rect2}) {
@@ -215,6 +225,7 @@ function rectangularCollision({rect1, rect2}) {
 function bulletCollision(bullet) {
     if (rectangularCollision({rect1: player, rect2: bullet})) {
         console.log("bullet collision")
+        despawnBullet(bullet)
     }
 }
 
