@@ -8,23 +8,11 @@ for (let i = 0; i < collisions.length; i += 36) {
     collisionsMap.push(collisions.slice(i,i + 36))
 }
 
-const tileSize = 32
-class Boundary {
-    static width = tileSize
-    static height = tileSize
-    constructor({ position }) {
-        this.position = position
-        this.width = Boundary.width
-        this.height = Boundary.height
-    }
-    draw() {
-        var r_a = 0.3;
-        c.fillStyle = "rgba(255, 0, 0, " + r_a + ")"; 
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    }
-}
 
 const boundaries = []
+
+// Bullet array
+const bullets = []
 
 collisionsMap.forEach((row, i) => {
     row.forEach((symbol, j) => {
@@ -49,25 +37,35 @@ backgroundImage.src = "./Assets/BackgroundNew.png"
 const playerImage = new Image()
 playerImage.src = "./Assets/goat animation.png"
 
+// TEMPORARY ASSET
+const bulletImage = new Image()
+bulletImage.src = "./Assets/goat animation.png"
+
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
+    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 8) , (playerImage.height /10))
 }
 
 class Sprite {
-    constructor({ position, velocity, image, frames = { max: 4 }, direction}) {
-        this.position = position;
-        this.velocity = velocity;
-        this.image = image;
-        this.frames = { ...frames, val: 0, elapsed: 0 };
-        this.direction = direction;
+    static frameAnimationCount = 10
+    constructor({ position, velocity = 0, image, frames = { max: 4 }, direction}) {
+        this.position = position
+        this.velocity = velocity
+        this.image = image
+        this.frames = { ...frames, val: 0, elapsed: 0 }
+        this.direction = direction
 
         this.image.onload = () => {
             this.width = this.image.width / this.frames.max
             this.height = this.image.height
-        };
+        }
         this.moving = false;
+    }
 
+    // Setter for x and y direction (for diagonal directions)
+    setXYDirection({x, y}) {
+        this.xDirection = x
+        this.yDirection = y
     }
 
     draw() {
@@ -75,18 +73,19 @@ class Sprite {
             this.image,
             (this.image.width / 4) * this.frames.val, 
             (this.image.height / 5) * this.direction,
+            this.image.width / 4 * this.frames.val, 
+            this.image.height / 5 * this.direction,
             this.image.width / 4,
             this.image.height / 5,
             this.position.x,
             this.position.y,
-            (this.image.width / 4) * 2.2,
-            (this.image.height / 5) * 2.2
+
+            this.image.width / 4 * 2.2,
+            this.image.height / 5 * 2.2,
         )
         if (this.moving) {
-            if (this.frames.max > 1) {
-                this.frames.elapsed++
-            }
-            if (this.frames.elapsed % 10 == 0) {
+            if (this.frames.max > 1) this.frames.elapsed++
+            if (this.frames.elapsed % Sprite.frameAnimationCount  == 0) {
                 if (this.frames.val < this.frames.max) this.frames.val++
                 else this.frames.val = 0
             }
@@ -123,7 +122,6 @@ const player = new Sprite({
         max: 3
     }, 
     direction: 0
-
 })
 
 const keys = {
@@ -181,8 +179,86 @@ class EnemySpawner {
         enemies.push(enemy);
     }
 }
+// Get diagonal bullet direction toward player
+function getPlayerDirection(origin) {
+    // Get x and y distances to player
+    let xDistance = origin.position.x - player.position.x
+    let yDistance = origin.position.y - player.position.y
 
-function rectangularCollision({rect1, rect2 }) {
+    // Get x and y... vector elements? is this a vector? is this how vectors work?? i just played around with these formulae until they looked and worked right
+    let direction = {x: xDistance / Math.abs(yDistance) * -1, y: yDistance / Math.abs(xDistance) * -1}
+
+    // Note that if a distance happens to be 0, the bullet simply doesn't spawn and nothing breaks so i guess we don't need to account for that ¯\_(ツ)_/¯
+
+    // Alternate method: straight line closest to player
+    /*
+    if (Math.abs(xDistance) > Math.abs(yDistance)) {
+        if (xDistance > 0) {
+            direction = 2
+        } else {
+            direction = 3
+        }
+    } else {
+        if (yDistance > 0) {
+            direction = 1
+        } else {
+            direction = 0
+        }
+    }
+    */
+
+    return direction
+}
+
+
+// Create bullet with specified origin and velocity
+function spawnBullet({origin, velocity}) {
+    // Get direction to player
+    let direction = getPlayerDirection(origin)
+
+    // Create bullet
+    let bullet = new Sprite({
+        position: {
+            x: origin.position.x,
+            y: origin.position.y
+        },
+        velocity: velocity,
+        image: bulletImage,
+        frames: {
+            max: 3
+        }, 
+        direction: 0
+    })
+    // Set bullet x and y direction, set bullet to moving
+    bullet.setXYDirection({x: direction.x, y: direction.y})
+    bullet.moving = true
+
+    // Set bullet width and height
+    bullet.width = 25
+    bullet.height = 25
+
+    // Add bullet to array
+    bullets.push(bullet)
+}
+
+// Move bullet forward
+function updateBullet(bullet) {
+    // Increment bullet position by direction * velocity
+    bullet.position.x += bullet.xDirection * bullet.velocity
+    bullet.position.y += bullet.yDirection * bullet.velocity
+
+    // If bullet reaches edge of screen, despawn (remove from array)
+    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (17 * 32 - bullet.height / 2)) {
+        despawnBullet(bullet)
+    }
+}
+
+// Despawn bullet (remove from array)
+function despawnBullet(bullet) {
+    bullets.splice(bullets.indexOf(bullet), 1)
+}
+
+function rectangularCollision({rect1, rect2}) {
     return (
         (rect1.position.x + rect1.width >= rect2.position.x)
         && (rect1.position.x <= rect2.position.x + rect2.width)
@@ -200,19 +276,37 @@ milkImage.onload = () => {
     enemySpawner.startSpawning();
 };
 
+// Test for bullet collision
+const speed = 3
+function bulletCollision(bullet) {
+    if (rectangularCollision({rect1: player, rect2: bullet})) {
+        console.log("bullet collision")
+        despawnBullet(bullet)
+
+        //DIE
+    }
+}
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-
-    boundaries.forEach(boundary => {
-        boundary.draw()
-    })
 
     // Draw enemies
     enemies.forEach(enemy => {
         enemy.updatePosition();
         enemy.draw();
     })
+
+    //boundaries.forEach(boundary => {
+        //boundary.draw()
+    //})
+
+    // Loop through bullets
+    for (let i = 0; i < bullets.length; i++) {
+        // Draw, check for collision, move forward
+        bullets[i].draw()
+        bulletCollision(bullets[i])
+        updateBullet(bullets[i])
+    }
 
     player.draw()
 
@@ -229,12 +323,12 @@ function animate() {
                         ...boundary,
                         position: {
                             x: boundary.position.x,
-                            y: boundary.position.y + 4
+                            y: boundary.position.y + speed
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding w")
                 moving = false
                 break
             }
@@ -242,7 +336,7 @@ function animate() {
         if (moving) {
             player.direction = 1
             player.moving = true
-            player.position.y -= 3
+            player.position.y -= speed
         }
     }
     if (keys.s == true) {
@@ -255,12 +349,12 @@ function animate() {
                         ...boundary,
                         position: {
                             x: boundary.position.x,
-                            y: boundary.position.y - 4
+                            y: boundary.position.y - speed
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding s")
                 moving = false
                 break
             }
@@ -268,7 +362,7 @@ function animate() {
         if (moving) {
             player.direction = 0
             player.moving = true
-            player.position.y += 3
+            player.position.y += speed
         }
     }
     if (keys.a == true) {
@@ -280,13 +374,13 @@ function animate() {
                     rect2: {
                         ...boundary,
                         position: {
-                            x: boundary.position.x + 4,
+                            x: boundary.position.x + speed,
                             y: boundary.position.y
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding a")
                 moving = false
                 break
             }
@@ -294,7 +388,7 @@ function animate() {
         if (moving) {
             player.direction = 2
             player.moving = true
-            player.position.x -= 3
+            player.position.x -= speed
         }
     }
     if (keys.d == true) {
@@ -306,13 +400,13 @@ function animate() {
                     rect2: {
                         ...boundary,
                         position: {
-                            x: boundary.position.x - 4,
+                            x: boundary.position.x - speed,
                             y: boundary.position.y
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding d")
                 moving = false
                 break
             }
@@ -320,10 +414,21 @@ function animate() {
         if (moving) {
             player.direction = 3
             player.moving = true
-            player.position.x += 3
+            player.position.x += speed
         }
     }
 }
+
+function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+
+function spawnBulletEveryCoupleSeconds() {
+    // Call spawnBullet with the provided arguments
+    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0,576) } }, velocity: getRandomNumber(0.5, 1) });
+}
+
 
 animate()
 
@@ -360,4 +465,3 @@ window.addEventListener('keyup', (e) => {
             break;
     }
 })
-
