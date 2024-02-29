@@ -8,6 +8,7 @@ for (let i = 0; i < collisions.length; i += 36) {
     collisionsMap.push(collisions.slice(i,i + 36))
 }
 
+
 const boundaries = []
 
 // Bullet array
@@ -48,9 +49,8 @@ goatIce.src = "./Assets/goatIce2.png"
 
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width /4) * 2.2, (playerImage.height /5) * 2.2)
-    //c.drawImage(logoImage, 0, 0, backgroundImage.width, backgroundImage.height)
 
+    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 8) , (playerImage.height /10))
 }
 
 class Sprite {
@@ -78,12 +78,15 @@ class Sprite {
     draw() {
         c.drawImage(
             this.image,
+            (this.image.width / 4) * this.frames.val, 
+            (this.image.height / 5) * this.direction,
             this.image.width / 4 * this.frames.val, 
             this.image.height / 5 * this.direction,
             this.image.width / 4,
             this.image.height / 5,
             this.position.x,
             this.position.y,
+
             this.image.width / 4 * 2.2,
             this.image.height / 5 * 2.2,
         )
@@ -94,6 +97,25 @@ class Sprite {
                 else this.frames.val = 0
             }
         }
+    }
+
+    // Add a method to update the sprite's position
+    updatePosition() {
+        // Check if the enemy reaches or exceeds the left or right edge of the backgroundImage
+        if (this.position.x <= 0 || this.position.x >= backgroundImage.width) {
+            // Reverse the x velocity to make the enemy bounce back
+            this.velocity.x = -this.velocity.x;
+        }
+
+        // Update y position
+        this.position.y += this.velocity.y;
+        // Check if the enemy reaches or exceeds the top or bottom edge of the backgroundImage
+        if (this.position.y <= 0 || this.position.y >= backgroundImage.height) {
+            // Reverse the y velocity to make the enemy bounce back
+            this.velocity.y = -this.velocity.y;
+        }
+        // Update x position
+        this.position.x += this.velocity.x;
     }
 }
 
@@ -131,6 +153,46 @@ const keys = {
 
 }
 
+const milkImage = new Image();
+milkImage.src = './Assets/Milkman/MilkManAnimation.png'
+class EnemySpawner {
+    constructor(interval) {
+        this.interval = interval;
+        this.spawnInterval = null;
+    }
+
+    startSpawning() {
+        this.spawnInterval = setInterval(() => {
+            this.spawnEnemy();
+        }, this.interval);
+    }
+
+    stopSpawning() {
+        clearInterval(this.spawnInterval);
+    }
+
+    spawnEnemy() {
+        // Create the enemy sprite immediately
+        const enemy = new Sprite({
+            position: {
+                x: Math.random() * (backgroundImage.width - playerImage.width),
+                y: Math.random() * (backgroundImage.height - playerImage.height)
+            },
+            velocity:{
+                x: Math.random() * 2 - 1,
+                y: Math.random() * 2 - 1
+            },
+            image: milkImage,
+            frames: {
+                max: 3
+            }, 
+            direction: 0
+        });
+    
+        // Add the enemy sprite to the game
+        enemies.push(enemy);
+    }
+}
 // Get diagonal bullet direction toward player
 function getPlayerDirection(origin) {
     // Get x and y distances to player
@@ -219,6 +281,15 @@ function rectangularCollision({rect1, rect2}) {
     )
 }
 
+const enemies = []; // Array to hold enemy sprites
+// Create an instance of EnemySpawner with a spawn interval of 3 seconds
+const enemySpawner = new EnemySpawner(2000);
+// Start spawning enemies
+milkImage.onload = () => {
+    // Start spawning enemies after the milk image has loaded
+    enemySpawner.startSpawning();
+};
+
 // Test for bullet collision
 const speed = 3
 function bulletCollision(bullet) {
@@ -226,6 +297,8 @@ function bulletCollision(bullet) {
         console.log("bullet collision")
         gameState = 2
         despawnBullet(bullet)
+
+        //DIE
     }
 }
 
@@ -242,6 +315,22 @@ function animate() {
             console.log('enter pressed')
             gameState = 1
         }
+    // Draw enemies
+    enemies.forEach(enemy => {
+        enemy.updatePosition();
+        enemy.draw();
+    })
+
+    //boundaries.forEach(boundary => {
+        //boundary.draw()
+    //})
+
+    // Loop through bullets
+    for (let i = 0; i < bullets.length; i++) {
+        // Draw, check for collision, move forward
+        bullets[i].draw()
+        bulletCollision(bullets[i])
+        updateBullet(bullets[i])
     }
     if (gameState == 1) {
         console.log("state 1")
@@ -389,11 +478,16 @@ function animate() {
     }
 }
 
-// Testing bullets
-spawnBullet({origin: {position: {x: 200, y: 200}}, velocity: 1})
-spawnBullet({origin: {position: {x: 300, y: 300}}, velocity: 2})
-spawnBullet({origin: {position: {x: 500, y: 200}}, velocity: 0.5})
-spawnBullet({origin: {position: {x: 100, y: 300}}, velocity: 4})
+function getRandomNumber(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+
+function spawnBulletEveryCoupleSeconds() {
+    // Call spawnBullet with the provided arguments
+    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0,576) } }, velocity: getRandomNumber(0.5, 1) });
+}
+
 
 animate()
 
