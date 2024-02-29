@@ -8,22 +8,6 @@ for (let i = 0; i < collisions.length; i += 36) {
     collisionsMap.push(collisions.slice(i,i + 36))
 }
 
-const tileSize = 32
-class Boundary {
-    static width = tileSize
-    static height = tileSize
-    constructor({ position }) {
-        this.position = position
-        this.width = Boundary.width
-        this.height = Boundary.height
-    }
-    draw() {
-        var r_a = 0.3;
-        c.fillStyle = "rgba(255, 0, 0, " + r_a + ")"; 
-        c.fillRect(this.position.x, this.position.y, this.width, this.height);
-    }
-}
-
 const boundaries = []
 
 // Bullet array
@@ -62,6 +46,7 @@ backgroundImage.onload = () => {
 }
 
 class Sprite {
+    static frameAnimationCount = 10
     constructor({ position, velocity = 0, image, frames = { max: 4 }, direction}) {
         this.position = position
         this.velocity = velocity
@@ -85,20 +70,18 @@ class Sprite {
     draw() {
         c.drawImage(
             this.image,
-            (this.image.width / 4) * this.frames.val, 
-            (this.image.height / 5) * this.direction,
+            this.image.width / 4 * this.frames.val, 
+            this.image.height / 5 * this.direction,
             this.image.width / 4,
             this.image.height / 5,
             this.position.x,
             this.position.y,
-            (this.image.width / 4) * 2.2,
-            (this.image.height / 5) * 2.2
+            this.image.width / 4 * 2.2,
+            this.image.height / 5 * 2.2,
         )
         if (this.moving) {
-            if (this.frames.max > 1) {
-                this.frames.elapsed++
-            }
-            if (this.frames.elapsed % 10 == 0) {
+            if (this.frames.max > 1) this.frames.elapsed++
+            if (this.frames.elapsed % Sprite.frameAnimationCount  == 0) {
                 if (this.frames.val < this.frames.max) this.frames.val++
                 else this.frames.val = 0
             }
@@ -222,13 +205,13 @@ function rectangularCollision({rect1, rect2}) {
 }
 
 // Test for bullet collision
+const speed = 3
 function bulletCollision(bullet) {
     if (rectangularCollision({rect1: player, rect2: bullet})) {
         console.log("bullet collision")
         despawnBullet(bullet)
     }
 }
-
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
@@ -261,12 +244,12 @@ function animate() {
                         ...boundary,
                         position: {
                             x: boundary.position.x,
-                            y: boundary.position.y + 4
+                            y: boundary.position.y + speed
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding w")
                 moving = false
                 break
             }
@@ -274,7 +257,7 @@ function animate() {
         if (moving) {
             player.direction = 1
             player.moving = true
-            player.position.y -= 3
+            player.position.y -= speed
         }
     }
     if (keys.s == true) {
@@ -287,12 +270,12 @@ function animate() {
                         ...boundary,
                         position: {
                             x: boundary.position.x,
-                            y: boundary.position.y - 4
+                            y: boundary.position.y - speed
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding s")
                 moving = false
                 break
             }
@@ -300,7 +283,7 @@ function animate() {
         if (moving) {
             player.direction = 0
             player.moving = true
-            player.position.y += 3
+            player.position.y += speed
         }
     }
     if (keys.a == true) {
@@ -312,13 +295,13 @@ function animate() {
                     rect2: {
                         ...boundary,
                         position: {
-                            x: boundary.position.x + 4,
+                            x: boundary.position.x + speed,
                             y: boundary.position.y
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding a")
                 moving = false
                 break
             }
@@ -326,7 +309,7 @@ function animate() {
         if (moving) {
             player.direction = 2
             player.moving = true
-            player.position.x -= 3
+            player.position.x -= speed
         }
     }
     if (keys.d == true) {
@@ -338,13 +321,13 @@ function animate() {
                     rect2: {
                         ...boundary,
                         position: {
-                            x: boundary.position.x - 4,
+                            x: boundary.position.x - speed,
                             y: boundary.position.y
                         }
                     }
                 })
             ) {
-                console.log("colliding")
+                console.log("colliding d")
                 moving = false
                 break
             }
@@ -352,7 +335,7 @@ function animate() {
         if (moving) {
             player.direction = 3
             player.moving = true
-            player.position.x += 3
+            player.position.x += speed
         }
     }
 }
