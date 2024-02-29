@@ -138,7 +138,7 @@ const player = new Sprite({
 
 //=====================Bullet Stuff==========================
 const bulletImage = new Image()
-bulletImage.src = "./Assets/goat animation.png"
+bulletImage.src = "./Assets/Icecream.png"
 
 // Get diagonal bullet direction toward player
 function getPlayerDirection(origin) {
@@ -169,7 +169,7 @@ function spawnBullet({ origin, velocity }) {
         },
         direction: 0,
         widthOfSprite: 4,
-        heighOfSprite: 5
+        heighOfSprite: 1
     })
     // Set bullet x and y direction, set bullet to moving
     bullet.setXYDirection({ x: direction.x, y: direction.y })
