@@ -42,7 +42,7 @@ bulletImage.src = "./Assets/goat animation.png"
 
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 0, 0 , (playerImage.width / 8) , (playerImage.height /10))
+    c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 8) , (playerImage.height /10))
 }
 
 class Sprite {
