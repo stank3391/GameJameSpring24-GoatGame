@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="8" height="4" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="1">
+ <tileset firstgid="1" source="WalkChar5.tsx"/>
+ <tileset firstgid="33" source="WalkEyes.tsx"/>
+ <tileset firstgid="481" source="WalkOveralls.tsx"/>
+ <tileset firstgid="801" source="WalkPants.tsx"/>
+ <tileset firstgid="1121" source="WalkShoes.tsx"/>
+ <tileset firstgid="1441" source="WalkHair.tsx"/>
+ <tileset firstgid="1889" source="WalkCowboyHat.tsx"/>
+ <layer id="1" name="Char" width="8" height="4">
+  <data encoding="csv">
+1,2,3,4,5,6,7,8,
+9,10,11,12,13,14,15,16,
+17,18,19,20,21,22,23,24,
+25,26,27,28,29,30,31,32
+</data>
+ </layer>
+ <layer id="2" name="Eyes" width="8" height="4">
+  <data encoding="csv">
+33,34,35,36,37,38,39,40,
+145,146,147,148,149,150,151,152,
+257,258,259,260,261,262,263,264,
+369,370,371,372,373,374,375,376
+</data>
+ </layer>
+ <layer id="3" name="Shirt" width="8" height="4">
+  <data encoding="csv">
+489,490,491,492,493,494,495,496,
+569,570,571,572,573,574,575,576,
+649,650,651,652,653,654,655,656,
+729,730,731,732,733,734,735,736
+</data>
+ </layer>
+ <layer id="4" name="Pants" width="8" height="4">
+  <data encoding="csv">
+809,810,811,812,813,814,815,816,
+889,890,891,892,893,894,895,896,
+969,970,971,972,973,974,975,976,
+1049,1050,1051,1052,1053,1054,1055,1056
+</data>
+ </layer>
+ <layer id="5" name="Shoes" width="8" height="4">
+  <data encoding="csv">
+1121,1122,1123,1124,1125,1126,1127,1128,
+1201,1202,1203,1204,1205,1206,1207,1208,
+1281,1282,1283,1284,1285,1286,1287,1288,
+1361,1362,1363,1364,1365,1366,1367,1368
+</data>
+ </layer>
+ <layer id="6" name="Hair" width="8" height="4">
+  <data encoding="csv">
+1441,1442,1443,1444,1445,1446,1447,1448,
+1553,1554,1555,1556,1557,1558,1559,1560,
+1665,1666,1667,1668,1669,1670,1671,1672,
+1777,1778,1779,1780,1781,1782,1783,1784
+</data>
+ </layer>
+ <layer id="7" name="Hat" width="8" height="4" visible="0">
+  <data encoding="csv">
+1889,1890,1891,1892,1893,1894,1895,1896,
+1897,1898,1899,1900,1901,1902,1903,1904,
+1905,1906,1907,1908,1909,1910,1911,1912,
+1913,1914,1915,1916,1917,1918,1919,1920
+</data>
+ </layer>
+</map>
