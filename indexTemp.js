@@ -275,7 +275,9 @@ function despawnEnemy(enemy) {
 
 function spawnEnemyEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
-    spawnEnemy();
+    if (enemies.length < 10) {
+        spawnEnemy();
+    }
 }
 
 function enemyCollision(enemy) {
