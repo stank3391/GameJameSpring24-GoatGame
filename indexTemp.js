@@ -25,6 +25,9 @@ const keys = {
     }
 }
 
+// Score
+let score = 0
+
 //===================Auxilliary Functions=================
 function getRandomNumber(min, max) {
     return Math.random() * (max - min) + min;
@@ -173,10 +176,12 @@ function spawnBullet({ origin, velocity }) {
     })
     // Set bullet x and y direction
     bullet.setXYDirection({ x: direction.x, y: direction.y })
+    // TEMPORARILY DISABLED ANIMATION
+    //bullet.moving = true
 
     // Set bullet width and height
-    bullet.width = 25
-    bullet.height = 25
+    bullet.width = 12
+    bullet.height = 29
 
     // Add bullet to array
     bullets.push(bullet)
@@ -214,6 +219,9 @@ function bulletCollision(bullet) {
     if (rectangularCollision({ rect1: player, rect2: bullet })) {
         console.log("bullet collision")
         despawnBullet(bullet)
+
+        // Decrement score
+        score--
 
         //DIE
         return 0
@@ -275,6 +283,9 @@ function enemyCollision(enemy) {
         console.log(player)
         console.log(enemy)
         despawnEnemy(enemy)
+
+        // Increment score
+        score++
 
         //DIE
         //return 0;
