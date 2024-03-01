@@ -39,8 +39,15 @@ playerImage.src = "./Assets/goat animation.png"
 const bulletImage = new Image()
 bulletImage.src = "./Assets/goat animation.png"
 
+const logoImage = new Image()
+logoImage.src = "./Assets/logo.png"
+
+const goatIce = new Image()
+goatIce.src = "./Assets/goatIce2.png"
+
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500 , (playerImage.width / 4) , (playerImage.height /5))
 }
 
@@ -132,7 +139,14 @@ const keys = {
     },
     d: {
         pressed: false
+    },
+    enter: {
+        pressed: false
+    },
+    reset: {
+        pressed: false
     }
+
 }
 
 const milkImage = new Image();
@@ -304,129 +318,169 @@ const speed = 3
 function bulletCollision(bullet) {
     if (rectangularCollision({rect1: player, rect2: bullet})) {
         console.log("bullet collision")
+        gameState = 2
         despawnBullet(bullet)
 
         //DIE
     }
 }
+
+
+let gameState = 0
+
+
 function animate() {
-    window.requestAnimationFrame(animate);
-    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-    // Loop through bullets
-    for (let i = 0; i < bullets.length; i++) {
-        // Draw, check for collision, move forward
-        bullets[i].draw()
-        bulletCollision(bullets[i])
-        updateBullet(bullets[i])
+    if (gameState == 0) {
+        window.requestAnimationFrame(animate);
+        c.drawImage(logoImage, 0, 0, canvas.width, canvas.height)
+        console.log("state 0")
+        if (keys.enter == true) {
+            console.log('enter pressed')
+            gameState = 1
+        }
     }
+    if (gameState == 1) {
+        console.log("state 1")
+        window.requestAnimationFrame(animate);
+        c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
 
-    player.draw()
+        //boundaries.forEach(boundary => {
+        //    boundary.draw()
+        //})
 
-    let moving = true
-    player.moving = false;
+        // Loop through bullets
+        for (let i = 0; i < bullets.length; i++) {
+            // Draw, check for collision, move forward
+            bullets[i].draw()
+            bulletCollision(bullets[i])
+            updateBullet(bullets[i])
+        }
 
-    if (keys.w == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x,
-                            y: boundary.position.y + speed
+        player.draw()
+
+        let moving = true
+        player.moving = false;
+
+        if (keys.w == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x,
+                                y: boundary.position.y + speed
+                            }
                         }
-                    }
-                })
-            ) {
-                console.log("colliding w")
-                moving = false
-                break
+                    })
+                ) {
+                    console.log("colliding w")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 1
+                player.moving = true
+                player.position.y -= speed
             }
         }
-        if (moving) {
-            player.direction = 1
-            player.moving = true
-            player.position.y -= speed
+        if (keys.s == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x,
+                                y: boundary.position.y - speed
+                            }
+                        }
+                    })
+                ) {
+                    console.log("colliding s")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 0
+                player.moving = true
+                player.position.y += speed
+            }
+        }
+        if (keys.a == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x + speed,
+                                y: boundary.position.y
+                            }
+                        }
+                    })
+                ) {
+                    console.log("colliding a")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 2
+                player.moving = true
+                player.position.x -= speed
+            }
+        }
+        if (keys.d == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x - speed,
+                                y: boundary.position.y
+                            }
+                        }
+                    })
+                ) {
+                    console.log("colliding d")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 3
+                player.moving = true
+                player.position.x += speed
+            }
         }
     }
-    if (keys.s == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x,
-                            y: boundary.position.y - speed
-                        }
-                    }
-                })
-            ) {
-                console.log("colliding s")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 0
-            player.moving = true
-            player.position.y += speed
-        }
-    }
-    if (keys.a == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x + speed,
-                            y: boundary.position.y
-                        }
-                    }
-                })
-            ) {
-                console.log("colliding a")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 2
-            player.moving = true
-            player.position.x -= speed
-        }
-    }
-    if (keys.d == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x - speed,
-                            y: boundary.position.y
-                        }
-                    }
-                })
-            ) {
-                console.log("colliding d")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 3
-            player.moving = true
-            player.position.x += speed
+   
+    if (gameState == 2) {
+        console.log("state 2")
+        window.requestAnimationFrame(animate);
+        c.fillRect(0, 0, canvas.width, canvas.height)
+        c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+        c.drawImage(goatIce, 500, 200, 100, 100 * goatIce.height / goatIce.width)
+        c.font = "48px serif"
+        c.fillText("You got hit!", 600, 250)
+        //add score later
+        //let score = 10
+        c.fillText('score:' + score, 600, 300)
+        if (keys.reset == true) {
+            bullets.forEach((element) => element.despawnBullet) //this should despawn bullets but it doesn't
+            gameState = 1;
         }
     }
 }
@@ -463,6 +517,12 @@ window.addEventListener('keydown', (e) => {
         case 'd':
             keys.d = true
             break;
+        case 'y':
+            keys.enter = true
+            break;
+        case 'r':
+            keys.reset = true
+            break;
     }
 })
 
@@ -479,6 +539,12 @@ window.addEventListener('keyup', (e) => {
             break;
         case 'd':
             keys.d = false
+            break;
+        case 'y':
+            keys.enter = false
+            break;
+        case 'r':
+            keys.reset = false
             break;
     }
 })
