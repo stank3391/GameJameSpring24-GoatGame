@@ -249,6 +249,9 @@ function spawnEnemy() {
             heighOfSprite: 4
         });
 
+        enemy.width = 30
+        enemy.height = 43
+
         // Add the enemy sprite to the game
         enemies.push(enemy);
 }
