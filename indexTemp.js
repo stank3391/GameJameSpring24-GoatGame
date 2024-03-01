@@ -93,7 +93,7 @@ class Sprite {
     draw() {
         c.drawImage(
             this.image,
-            this.image.width / this.heighOfSprite * this.frames.val,
+            this.image.width / this.widthOfSprite * this.frames.val,
             this.image.height / this.heighOfSprite * this.direction,
             this.image.width / this.widthOfSprite,
             this.image.height / this.heighOfSprite, 
@@ -157,6 +157,7 @@ function getPlayerDirection(origin) {
     return direction
 }
 
+let score = 0
 // Create bullet with specified origin and velocity
 function spawnBullet({ origin, velocity }) {
     // Get direction to player
@@ -184,7 +185,7 @@ function spawnBullet({ origin, velocity }) {
     // Set bullet width and height
     bullet.width = 25
     bullet.height = 25
-
+    score++
     // Add bullet to array
     bullets.push(bullet)
 }
@@ -287,7 +288,6 @@ function enemyCollision(enemy) {
 //=====================Animate========================
 
 let gameState = 0
-let score = 0
 
 const logoImage = new Image()
 logoImage.src = "./Assets/logo.png"
@@ -295,6 +295,10 @@ logoImage.src = "./Assets/logo.png"
 const goatIce = new Image()
 goatIce.src = "./Assets/goatIce2.png"
 
+let firstLoop = 0
+
+let bulletSpawner = 0
+let enemySpawner = 0
 
 function animate() {
 
@@ -328,7 +332,20 @@ function animate() {
             enemyCollision(enemies[j])
         }
 
+
         player.draw()
+
+
+
+        ////Call the function initially
+        //spawnBulletEveryCoupleSeconds();
+        //spawnEnemyEveryCoupleSeconds();
+        // Set interval to execute the function every couple of seconds (2000 milliseconds)
+        if (firstLoop == 0) {
+            bulletSpawner = setInterval(spawnBulletEveryCoupleSeconds, 2000);
+            enemySpawner = setInterval(spawnEnemyEveryCoupleSeconds, 2000);
+        }
+        firstLoop = 1
 
         let moving = true
         player.moving = false;
@@ -439,8 +456,14 @@ function animate() {
         }
     }
     if (gameState == 2) {
-        console.log("state 2")
         window.requestAnimationFrame(animate);
+
+        console.log("state 2")
+        clearInterval(bulletSpawner)
+        clearInterval(enemySpawner)
+        firstLoop = 0
+
+
         c.fillRect(0, 0, canvas.width, canvas.height)
         c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
         c.drawImage(goatIce, 500, 200, 100, 100 * goatIce.height / goatIce.width)
@@ -448,9 +471,10 @@ function animate() {
         c.fillText("You got hit!", 600, 250)
         c.fillText('score:' + score, 600, 300)
         if (keys.reset == true) {
-            enemies.forEach((element) => element.despawnEnemy)
-            bullets.forEach((element) => element.despawnBullet)
+            enemies.forEach((element) => despawnEnemy(element))
+            bullets.forEach((element) => despawnBullet(element))
             gameState = 1;
+            score = 0
         }
     }
 }
