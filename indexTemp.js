@@ -223,7 +223,12 @@ function bulletCollision(bullet) {
 
 function spawnBulletEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
-    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0, 576) } }, velocity: getRandomNumber(0.5, 1) });
+    if (enemies.length > 0) {
+        let enemyID = getRandomNumber(0, enemies.length - 1)
+        let enemyX = enemies[enemyID].position.x
+        let enemyY = enemies[enemyID].position.y
+        spawnBullet({ origin: { position: { x: enemyX, y: enemyY } }, velocity: getRandomNumber(0.5, 1) });
+    }
 }
 
 //=========================MilkMan Stuff=======================
