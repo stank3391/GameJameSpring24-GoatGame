@@ -33,6 +33,7 @@ const keys = {
 
 // Score
 let score = 0
+let total = 0
 
 //===================Auxilliary Functions=================
 function getRandomNumber(min, max) {
@@ -161,7 +162,6 @@ function getPlayerDirection(origin) {
     return direction
 }
 
-let score = 0
 // Create bullet with specified origin and velocity
 function spawnBullet({ origin, velocity }) {
     // Get direction to player
@@ -226,7 +226,7 @@ function rectangularCollision({ rect1, rect2 }) {
 // Test for bullet collision
 function bulletCollision(bullet) {
     if (rectangularCollision({ rect1: player, rect2: bullet })) {
-        console.log("bullet collision")
+        //console.log("bullet collision")
         despawnBullet(bullet)
         // Decrement score
         score--
@@ -313,13 +313,14 @@ function spawnEnemyEveryCoupleSeconds() {
 
 function enemyCollision(enemy) {
     if (rectangularCollision({ rect1: player, rect2: enemy })) {
-        console.log("enemy collision")
-        console.log(player)
-        console.log(enemy)
+        //console.log("enemy collision")
+        //console.log(player)
+        //console.log(enemy)
         despawnEnemy(enemy)
 
         // Increment score
         score++
+        total++
 
         //gameState = 2
         //DIE
@@ -347,28 +348,12 @@ let bulletSpawner = 0
 let enemySpawner = 0
 
 function animate() {
-    window.requestAnimationFrame(animate);
-    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
-
-    // Write score
-    c.fillText(`Score: ${score}`, 10, 20)
-
-    // Loop through bullets
-    for (let i = 0; i < bullets.length; i++) {
-        // Draw, check for collision, move forward
-        bullets[i].draw()
-        if (bulletCollision(bullets[i]) != 0) {
-            updateBullet(bullets[i])
-        }
-    }
-
-
     if (gameState == 0) {
         window.requestAnimationFrame(animate);
         c.drawImage(logoImage, 0, 0, canvas.width, canvas.height)
-        console.log("state 0")
+        //`console.log("state 0")
         if (keys.enter == true) {
-            console.log('enter pressed')
+            //console.log('enter pressed')
             gameState = 1
         }
     }
@@ -376,6 +361,15 @@ function animate() {
     if (gameState == 1) {
         window.requestAnimationFrame(animate);
         c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+
+
+        if (score <= -10) {
+            gameState = 2
+        }
+
+        // Write score
+        c.fillText(`Score: ${score}`, 10, 20)
+
         // Loop through bullets
         for (let i = 0; i < bullets.length; i++) {
             // Draw, check for collision, move forward
@@ -518,7 +512,7 @@ function animate() {
     if (gameState == 2) {
         window.requestAnimationFrame(animate);
 
-        console.log("state 2")
+        //console.log("state 2")
         clearInterval(bulletSpawner)
         clearInterval(enemySpawner)
         firstLoop = 0
@@ -527,14 +521,14 @@ function animate() {
         c.fillRect(0, 0, canvas.width, canvas.height)
         c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
         c.drawImage(goatIce, 500, 200, 100, 100 * goatIce.height / goatIce.width)
-        c.font = "48px serif"
         c.fillText("You got hit!", 600, 250)
-        c.fillText('score:' + score, 600, 300)
+        c.fillText('score:' + total, 600, 300)
         if (keys.reset == true) {
             enemies.forEach((element) => despawnEnemy(element))
             bullets.forEach((element) => despawnBullet(element))
             gameState = 1;
             score = 0
+            total = 0
         }
     }
 }
