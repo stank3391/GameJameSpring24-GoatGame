@@ -195,7 +195,7 @@ function updateBullet(bullet) {
     bullet.position.y += bullet.yDirection * bullet.velocity
 
     // If bullet reaches edge of screen, despawn (remove from array)
-    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (17 * 32 - bullet.height / 2)) {
+    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (16 * 32)) {
         despawnBullet(bullet)
     }
 }
