@@ -56,6 +56,7 @@ backgroundImage.src = "./Assets/BackgroundNew.png"
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500, (playerImage.width / 4), (playerImage.height / 5))
+    c.font = '20px sans-serif'
 }
 
 
@@ -300,6 +301,10 @@ function enemyCollision(enemy) {
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+
+    // Write score
+    c.fillText(`Score: ${score}`, 10, 20)
+
     // Loop through bullets
     for (let i = 0; i < bullets.length; i++) {
         // Draw, check for collision, move forward
