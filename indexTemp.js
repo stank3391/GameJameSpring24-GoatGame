@@ -233,9 +233,9 @@ function spawnBulletEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
     if (enemies.length > 0) {
         let enemyID = Math.round(getRandomNumber(0, enemies.length - 1))
-        let enemyX = enemies[enemyID].position.x
-        let enemyY = enemies[enemyID].position.y
-        spawnBullet({ origin: { position: { x: enemyX, y: enemyY } }, velocity: getRandomNumber(0.5, 1) });
+        let x = enemies[enemyID].position.x
+        let y = enemies[enemyID].position.y
+        spawnBullet({ origin: { position: { x: x, y: y } }, velocity: getRandomNumber(0.5, 1) });
     }
 }
 
@@ -244,29 +244,52 @@ const milkImage = new Image();
 milkImage.src = './Assets/Milkman/MilkManAnimation.png'
 
 function spawnEnemy() {
-        const enemy = new Sprite({
-            position: {
-                x: getRandomNumber(100, 1000),
-                y: getRandomNumber(50, 400)
-            },
-            velocity: {
-                x: Math.random() * 2 - 1,
-                y: Math.random() * 2 - 1
-            },
-            image: milkImage,
-            frames: {
-                max: 8
-            },
-            direction: 0,
-            widthOfSprite: 8,
-            heighOfSprite: 4
-        });
+    let x = getRandomNumber(100, 1000)
+    let y = getRandomNumber(70, 360)
 
-        enemy.width = 30
-        enemy.height = 43
+    // Cancel spawn if coordinates in inaccessible area
+    if (
+        (100 < x && x < 160 && 140 < y && y < 280)
+        || (150 < x && x < 250 && 210 < y && y < 250)
+        || (220 < x && x < 320 && 70 < y && y < 210)
+        || (220 < x && x < 320 && 260 < y && y < 400)
+        || (380 < x && x < 480 && 50 < y && y < 170)
+        || (390 < x && x < 550 && 280 < y && y < 360)
+        || (410 < x && x < 520 && 130 < y && y < 270)
+        || (600 < x && x < 710 && 50 < y && y < 110)
+        || (640 < x && x < 770 && 140 < y && y < 330)
+        || (710 < x && x < 820 && 50 < y && y < 140)
+        || (710 < x && x < 840 && 200 < y && y < 330)
+        || (780 < x && x < 1000 && 50 < y && y < 180)
+        || (930 < x && x < 1000 && 50 < y && y < 250)
+        || (890 < x && x < 1000 && 220 < y && y < 360)
+    ) {
+        return
+    }
 
-        // Add the enemy sprite to the game
-        enemies.push(enemy);
+    const enemy = new Sprite({
+        position: {
+            x: x,
+            y: y
+        },
+        velocity: {
+            x: Math.random() * 2 - 1,
+            y: Math.random() * 2 - 1
+        },
+        image: milkImage,
+        frames: {
+            max: 8
+        },
+        direction: 0,
+        widthOfSprite: 8,
+        heighOfSprite: 4
+    });
+
+    enemy.width = 30
+    enemy.height = 43
+
+    // Add the enemy sprite to the game
+    enemies.push(enemy);
 }
 
 function despawnEnemy(enemy) {
