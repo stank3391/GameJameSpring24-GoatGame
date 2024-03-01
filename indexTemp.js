@@ -33,7 +33,7 @@ const keys = {
 
 // Score
 let score = 0
-let total = 0
+let health = 5
 
 //===================Auxilliary Functions=================
 function getRandomNumber(min, max) {
@@ -228,8 +228,8 @@ function bulletCollision(bullet) {
     if (rectangularCollision({ rect1: player, rect2: bullet })) {
         //console.log("bullet collision")
         despawnBullet(bullet)
-        // Decrement score
-        score--
+        // Decrement health
+        health--
 
         //gameState = 2
         //DIE
@@ -320,7 +320,6 @@ function enemyCollision(enemy) {
 
         // Increment score
         score++
-        total++
 
         //gameState = 2
         //DIE
@@ -363,12 +362,13 @@ function animate() {
         c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
 
 
-        if (score <= -10) {
+        if (health <= 0) {
             gameState = 2
         }
 
         // Write score
         c.fillText(`Score: ${score}`, 10, 20)
+        c.fillText(`Health: ${health}`, 10, 40)
 
         // Loop through bullets
         for (let i = 0; i < bullets.length; i++) {
@@ -522,13 +522,13 @@ function animate() {
         c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
         c.drawImage(goatIce, 500, 200, 100, 100 * goatIce.height / goatIce.width)
         c.fillText("You got hit!", 600, 250)
-        c.fillText('score:' + total, 600, 300)
+        c.fillText('score:' + score, 600, 300)
         if (keys.reset == true) {
             enemies.forEach((element) => despawnEnemy(element))
             bullets.forEach((element) => despawnBullet(element))
             gameState = 1;
             score = 0
-            total = 0
+            health = 5
         }
     }
 }
