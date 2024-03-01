@@ -9,6 +9,7 @@ const collisionsMap = []
 const boundaries = []
 const backgroundImage = new Image()
 const enemies = []
+const lickedEnemies = []
 const bullets = []
 const keys = {
     w: {
@@ -300,8 +301,32 @@ function spawnEnemy() {
     enemies.push(enemy);
 }
 
+// Remove milkman as enemy
 function despawnEnemy(enemy) {
+    // Set velocity so milkman moves to top or bottom, whichever is closest
+    if (enemy.position.y < (36 * 9)) {
+        enemy.velocity = -2
+    } else {
+        enemy.velocity = 2
+    }
+
+    // Move from enemies list to lickedEnemies
+    lickedEnemies.push(enemy)
     enemies.splice(enemies.indexOf(enemy), 1)
+}
+
+// Update fleeing milkman
+function updateLickedEnemy(enemy) {
+    enemy.position.y += enemy.velocity
+
+    if (enemy.position.x < 0 || enemy.position.x > (35 * 32 - enemy.width / 2) || enemy.position.y < 0 || enemy.position.y > (16 * 32)) {
+        despawnLickedEnemy(enemy)
+    }
+}
+
+// Despawn fleeing milkman
+function despawnLickedEnemy(enemy) {
+    lickedEnemies.splice(enemies.indexOf(enemy), 1)
 }
 
 function spawnEnemyEveryCoupleSeconds() {
@@ -384,6 +409,12 @@ function animate() {
             // Draw, check for collision, move forward
             enemies[j].draw()
             enemyCollision(enemies[j])
+        }
+
+        // Loop through fleeing enemies
+        for (let k = 0; k < lickedEnemies.length; k++) {
+            lickedEnemies[k].draw()
+            updateLickedEnemy(lickedEnemies[k])
         }
 
 
