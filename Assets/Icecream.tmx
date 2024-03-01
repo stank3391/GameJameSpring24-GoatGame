@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="4" height="2" tilewidth="16" tileheight="16" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="../../../../../Downloads/full version/full version/global.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="4" height="2">
+  <data encoding="csv">
+4307,4308,4309,4310,
+4455,4456,4457,4458
+</data>
+ </layer>
+</map>
