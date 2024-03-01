@@ -31,6 +31,9 @@ const keys = {
     }
 }
 
+// Score
+let score = 0
+
 //===================Auxilliary Functions=================
 function getRandomNumber(min, max) {
     return Math.random() * (max - min) + min;
@@ -59,6 +62,7 @@ backgroundImage.src = "./Assets/BackgroundNew.png"
 backgroundImage.onload = () => {
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
     c.drawImage(playerImage, 0, 0, playerImage.width / 4, playerImage.height / 5, 500, 500, (playerImage.width / 4), (playerImage.height / 5))
+    c.font = '20px sans-serif'
 }
 
 
@@ -178,14 +182,16 @@ function spawnBullet({ origin, velocity }) {
         widthOfSprite: 4,
         heighOfSprite: 1
     })
-    // Set bullet x and y direction, set bullet to moving
+    // Set bullet x and y direction
     bullet.setXYDirection({ x: direction.x, y: direction.y })
-    bullet.moving = true
+    // TEMPORARILY DISABLED ANIMATION
+    //bullet.moving = true
 
     // Set bullet width and height
-    bullet.width = 25
-    bullet.height = 25
-    score++
+    bullet.width = 12
+    bullet.height = 29
+
+
     // Add bullet to array
     bullets.push(bullet)
 }
@@ -197,7 +203,7 @@ function updateBullet(bullet) {
     bullet.position.y += bullet.yDirection * bullet.velocity
 
     // If bullet reaches edge of screen, despawn (remove from array)
-    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (17 * 32 - bullet.height / 2)) {
+    if (bullet.position.x < 0 || bullet.position.x > (35 * 32 - bullet.width / 2) || bullet.position.y < 0 || bullet.position.y > (16 * 32)) {
         despawnBullet(bullet)
     }
 }
@@ -222,7 +228,10 @@ function bulletCollision(bullet) {
     if (rectangularCollision({ rect1: player, rect2: bullet })) {
         console.log("bullet collision")
         despawnBullet(bullet)
-        gameState = 2
+        // Decrement score
+        score--
+
+        //gameState = 2
         //DIE
         return 0
     }
@@ -230,7 +239,12 @@ function bulletCollision(bullet) {
 
 function spawnBulletEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
-    spawnBullet({ origin: { position: { x: getRandomNumber(0, 1152), y: getRandomNumber(0, 576) } }, velocity: getRandomNumber(0.5, 1) });
+    if (enemies.length > 0) {
+        let enemyID = Math.round(getRandomNumber(0, enemies.length - 1))
+        let x = enemies[enemyID].position.x
+        let y = enemies[enemyID].position.y
+        spawnBullet({ origin: { position: { x: x, y: y } }, velocity: getRandomNumber(0.5, 1) });
+    }
 }
 
 //=========================MilkMan Stuff=======================
@@ -238,26 +252,52 @@ const milkImage = new Image();
 milkImage.src = './Assets/Milkman/MilkManAnimation.png'
 
 function spawnEnemy() {
-        const enemy = new Sprite({
-            position: {
-                x: getRandomNumber(100, 1000),
-                y: getRandomNumber(50, 400)
-            },
-            velocity: {
-                x: Math.random() * 2 - 1,
-                y: Math.random() * 2 - 1
-            },
-            image: milkImage,
-            frames: {
-                max: 8
-            },
-            direction: 0,
-            widthOfSprite: 8,
-            heighOfSprite: 4
-        });
+    let x = getRandomNumber(100, 1000)
+    let y = getRandomNumber(70, 360)
 
-        // Add the enemy sprite to the game
-        enemies.push(enemy);
+    // Cancel spawn if coordinates in inaccessible area
+    if (
+        (100 < x && x < 160 && 140 < y && y < 280)
+        || (150 < x && x < 250 && 210 < y && y < 250)
+        || (220 < x && x < 320 && 70 < y && y < 210)
+        || (220 < x && x < 320 && 260 < y && y < 400)
+        || (380 < x && x < 480 && 50 < y && y < 170)
+        || (390 < x && x < 550 && 280 < y && y < 360)
+        || (410 < x && x < 520 && 130 < y && y < 270)
+        || (600 < x && x < 710 && 50 < y && y < 110)
+        || (640 < x && x < 770 && 140 < y && y < 330)
+        || (710 < x && x < 820 && 50 < y && y < 140)
+        || (710 < x && x < 840 && 200 < y && y < 330)
+        || (780 < x && x < 1000 && 50 < y && y < 180)
+        || (930 < x && x < 1000 && 50 < y && y < 250)
+        || (890 < x && x < 1000 && 220 < y && y < 360)
+    ) {
+        return
+    }
+
+    const enemy = new Sprite({
+        position: {
+            x: x,
+            y: y
+        },
+        velocity: {
+            x: Math.random() * 2 - 1,
+            y: Math.random() * 2 - 1
+        },
+        image: milkImage,
+        frames: {
+            max: 8
+        },
+        direction: 0,
+        widthOfSprite: 8,
+        heighOfSprite: 4
+    });
+
+    enemy.width = 30
+    enemy.height = 43
+
+    // Add the enemy sprite to the game
+    enemies.push(enemy);
 }
 
 function despawnEnemy(enemy) {
@@ -266,7 +306,9 @@ function despawnEnemy(enemy) {
 
 function spawnEnemyEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
-    spawnEnemy();
+    if (enemies.length < 10) {
+        spawnEnemy();
+    }
 }
 
 function enemyCollision(enemy) {
@@ -275,7 +317,11 @@ function enemyCollision(enemy) {
         console.log(player)
         console.log(enemy)
         despawnEnemy(enemy)
-        gameState = 2
+
+        // Increment score
+        score++
+
+        //gameState = 2
         //DIE
         //return 0;
     }
@@ -301,6 +347,20 @@ let bulletSpawner = 0
 let enemySpawner = 0
 
 function animate() {
+    window.requestAnimationFrame(animate);
+    c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+
+    // Write score
+    c.fillText(`Score: ${score}`, 10, 20)
+
+    // Loop through bullets
+    for (let i = 0; i < bullets.length; i++) {
+        // Draw, check for collision, move forward
+        bullets[i].draw()
+        if (bulletCollision(bullets[i]) != 0) {
+            updateBullet(bullets[i])
+        }
+    }
 
 
     if (gameState == 0) {
