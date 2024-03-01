@@ -22,6 +22,12 @@ const keys = {
     },
     d: {
         pressed: false
+    },
+    enter: {
+        pressed: false
+    },
+    reset: {
+        pressed: false
     }
 }
 
@@ -91,7 +97,7 @@ class Sprite {
     draw() {
         c.drawImage(
             this.image,
-            this.image.width / this.heighOfSprite * this.frames.val,
+            this.image.width / this.widthOfSprite * this.frames.val,
             this.image.height / this.heighOfSprite * this.direction,
             this.image.width / this.widthOfSprite,
             this.image.height / this.heighOfSprite, 
@@ -155,6 +161,7 @@ function getPlayerDirection(origin) {
     return direction
 }
 
+let score = 0
 // Create bullet with specified origin and velocity
 function spawnBullet({ origin, velocity }) {
     // Get direction to player
@@ -183,6 +190,7 @@ function spawnBullet({ origin, velocity }) {
     // Set bullet width and height
     bullet.width = 12
     bullet.height = 29
+
 
     // Add bullet to array
     bullets.push(bullet)
@@ -220,10 +228,10 @@ function bulletCollision(bullet) {
     if (rectangularCollision({ rect1: player, rect2: bullet })) {
         console.log("bullet collision")
         despawnBullet(bullet)
-
         // Decrement score
         score--
 
+        //gameState = 2
         //DIE
         return 0
     }
@@ -313,6 +321,7 @@ function enemyCollision(enemy) {
         // Increment score
         score++
 
+        //gameState = 2
         //DIE
         //return 0;
     }
@@ -323,6 +332,20 @@ function enemyCollision(enemy) {
 
 
 //=====================Animate========================
+
+let gameState = 0
+
+const logoImage = new Image()
+logoImage.src = "./Assets/logo.png"
+
+const goatIce = new Image()
+goatIce.src = "./Assets/goatIce2.png"
+
+let firstLoop = 0
+
+let bulletSpawner = 0
+let enemySpawner = 0
+
 function animate() {
     window.requestAnimationFrame(animate);
     c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
@@ -339,120 +362,179 @@ function animate() {
         }
     }
 
-    // Loop through enemies
-    for (let j = 0; j < enemies.length; j++) {
-        // Draw, check for collision, move forward
-        enemies[j].draw()
-        enemyCollision(enemies[j])
+
+    if (gameState == 0) {
+        window.requestAnimationFrame(animate);
+        c.drawImage(logoImage, 0, 0, canvas.width, canvas.height)
+        console.log("state 0")
+        if (keys.enter == true) {
+            console.log('enter pressed')
+            gameState = 1
+        }
     }
 
-    player.draw()
+    if (gameState == 1) {
+        window.requestAnimationFrame(animate);
+        c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+        // Loop through bullets
+        for (let i = 0; i < bullets.length; i++) {
+            // Draw, check for collision, move forward
+            bullets[i].draw()
+            if (bulletCollision(bullets[i]) != 0) {
+                updateBullet(bullets[i])
+            }
+        }
 
-    let moving = true
-    player.moving = false;
+        // Loop through enemies
+        for (let j = 0; j < enemies.length; j++) {
+            // Draw, check for collision, move forward
+            enemies[j].draw()
+            enemyCollision(enemies[j])
+        }
 
-    if (keys.w == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x,
-                            y: boundary.position.y + speed
+
+        player.draw()
+
+
+
+        ////Call the function initially
+        //spawnBulletEveryCoupleSeconds();
+        //spawnEnemyEveryCoupleSeconds();
+        // Set interval to execute the function every couple of seconds (2000 milliseconds)
+        if (firstLoop == 0) {
+            bulletSpawner = setInterval(spawnBulletEveryCoupleSeconds, 2000);
+            enemySpawner = setInterval(spawnEnemyEveryCoupleSeconds, 2000);
+        }
+        firstLoop = 1
+
+        let moving = true
+        player.moving = false;
+
+        if (keys.w == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x,
+                                y: boundary.position.y + speed
+                            }
                         }
-                    }
-                })
-            ) {
-                //console.log("colliding w")
-                moving = false
-                break
+                    })
+                ) {
+                    //console.log("colliding w")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 1
+                player.moving = true
+                player.position.y -= speed
             }
         }
-        if (moving) {
-            player.direction = 1
-            player.moving = true
-            player.position.y -= speed
+        if (keys.s == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x,
+                                y: boundary.position.y - speed
+                            }
+                        }
+                    })
+                ) {
+                    //console.log("colliding s")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 0
+                player.moving = true
+                player.position.y += speed
+            }
+        }
+        if (keys.a == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x + speed,
+                                y: boundary.position.y
+                            }
+                        }
+                    })
+                ) {
+                    //console.log("colliding a")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 2
+                player.moving = true
+                player.position.x -= speed
+            }
+        }
+        if (keys.d == true) {
+            for (let i = 0; i < boundaries.length; i++) {
+                const boundary = boundaries[i]
+                if (
+                    rectangularCollision({
+                        rect1: player,
+                        rect2: {
+                            ...boundary,
+                            position: {
+                                x: boundary.position.x - speed,
+                                y: boundary.position.y
+                            }
+                        }
+                    })
+                ) {
+                    //console.log("colliding d")
+                    moving = false
+                    break
+                }
+            }
+            if (moving) {
+                player.direction = 3
+                player.moving = true
+                player.position.x += speed
+            }
         }
     }
-    if (keys.s == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x,
-                            y: boundary.position.y - speed
-                        }
-                    }
-                })
-            ) {
-                //console.log("colliding s")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 0
-            player.moving = true
-            player.position.y += speed
-        }
-    }
-    if (keys.a == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x + speed,
-                            y: boundary.position.y
-                        }
-                    }
-                })
-            ) {
-                //console.log("colliding a")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 2
-            player.moving = true
-            player.position.x -= speed
-        }
-    }
-    if (keys.d == true) {
-        for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
-            if (
-                rectangularCollision({
-                    rect1: player,
-                    rect2: {
-                        ...boundary,
-                        position: {
-                            x: boundary.position.x - speed,
-                            y: boundary.position.y
-                        }
-                    }
-                })
-            ) {
-                //console.log("colliding d")
-                moving = false
-                break
-            }
-        }
-        if (moving) {
-            player.direction = 3
-            player.moving = true
-            player.position.x += speed
+    if (gameState == 2) {
+        window.requestAnimationFrame(animate);
+
+        console.log("state 2")
+        clearInterval(bulletSpawner)
+        clearInterval(enemySpawner)
+        firstLoop = 0
+
+
+        c.fillRect(0, 0, canvas.width, canvas.height)
+        c.drawImage(backgroundImage, 0, 0, backgroundImage.width, backgroundImage.height)
+        c.drawImage(goatIce, 500, 200, 100, 100 * goatIce.height / goatIce.width)
+        c.font = "48px serif"
+        c.fillText("You got hit!", 600, 250)
+        c.fillText('score:' + score, 600, 300)
+        if (keys.reset == true) {
+            enemies.forEach((element) => despawnEnemy(element))
+            bullets.forEach((element) => despawnBullet(element))
+            gameState = 1;
+            score = 0
         }
     }
 }
@@ -475,6 +557,12 @@ window.addEventListener('keydown', (e) => {
         case 'd':
             keys.d = true
             break;
+        case 'g':
+            keys.enter = true
+            break;
+        case 'r':
+            keys.reset = true
+            break;
     }
 })
 
@@ -492,6 +580,12 @@ window.addEventListener('keyup', (e) => {
             break;
         case 'd':
             keys.d = false
+            break;
+        case 'g':
+            keys.enter = false
+            break;
+        case 'r':
+            keys.reset = false
             break;
     }
 })
