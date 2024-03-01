@@ -171,9 +171,8 @@ function spawnBullet({ origin, velocity }) {
         widthOfSprite: 4,
         heighOfSprite: 1
     })
-    // Set bullet x and y direction, set bullet to moving
+    // Set bullet x and y direction
     bullet.setXYDirection({ x: direction.x, y: direction.y })
-    bullet.moving = true
 
     // Set bullet width and height
     bullet.width = 25
@@ -224,7 +223,7 @@ function bulletCollision(bullet) {
 function spawnBulletEveryCoupleSeconds() {
     // Call spawnBullet with the provided arguments
     if (enemies.length > 0) {
-        let enemyID = getRandomNumber(0, enemies.length - 1)
+        let enemyID = Math.round(getRandomNumber(0, enemies.length - 1))
         let enemyX = enemies[enemyID].position.x
         let enemyY = enemies[enemyID].position.y
         spawnBullet({ origin: { position: { x: enemyX, y: enemyY } }, velocity: getRandomNumber(0.5, 1) });
